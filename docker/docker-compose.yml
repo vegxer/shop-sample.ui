@@ -1,0 +1,14 @@
+version: '3.5'
+services:
+  ui:
+    image: vegxer/shop-sample/ui:${UI_VERSION}
+    networks:
+      - shop-ui-lan
+    ports:
+      - ${PORT}:80
+    env_file: .env
+networks:
+  shop-ui-lan:
+    name: shop-sample-lan
+    external: true
+    driver: bridge
