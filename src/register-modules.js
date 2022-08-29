@@ -7,7 +7,7 @@ const registerModule = (name, module) => {
   }
 
   if (module.router) {
-    module.router(router);
+    router.addRoute(module.router);
   }
 };
 

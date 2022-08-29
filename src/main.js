@@ -3,15 +3,13 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 
-import cartModule from "./modules/cart";
-import productsModule from "./modules/products";
+import categoriesModule from "./modules/categories";
 
 import { registerModules } from "./register-modules";
 import vuetify from "./plugins/vuetify";
 
 registerModules({
-  products: productsModule,
-  cart: cartModule
+  categories: categoriesModule
 });
 
 Vue.config.productionTip = false;

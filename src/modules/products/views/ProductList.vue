@@ -22,7 +22,7 @@
           <v-card-actions>
             <v-spacer />
 
-            <v-btn :to="`/products/${product.id}`" depressed>
+            <v-btn :to="`/categories/${product.id}`" depressed>
               View
             </v-btn>
 
