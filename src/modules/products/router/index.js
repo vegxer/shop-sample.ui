@@ -3,15 +3,15 @@ import Product from "@/modules/products/views/Product";
 import Module from "@/modules/products/Module";
 
 export default {
-    path: "/categories",
+    path: "/",
     component: Module,
     children: [
         {
-            path: "",
+            path: "categories/:id/products",
             component: ProductList
         },
         {
-            path: ":id",
+            path: "products:id",
             component: Product
         }
     ]

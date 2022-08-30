@@ -9,7 +9,7 @@
     <v-row v-else-if="categories.length">
       <v-col cols="3" v-for="category in categories" :key="category.id">
         <v-card @click="moveToSubPage(category)">
-          <v-img height="300" :src="fullPath(category.thumbnailPath)"/>
+          <v-img height="300" :src="fullPath(category.imageThumbnailPath)"/>
           <v-card-title>
             {{ category.name }}
           </v-card-title>
@@ -46,15 +46,17 @@ export default {
     moveToSubPage(currCategory) {
       if (currCategory.hasChildren) {
         this.$router.push(`/categories/${currCategory.id}`);
+      } else {
+        this.$router.push(`/categories/${currCategory.id}/products`);
       }
     },
     async loadCategories() {
       this.isLoading = true;
 
       try {
-        this.categories = (await (this.$route.params.id == null
-            ? categoryService.getPrimal(1, 10)
-            : categoryService.getSubcategories(this.$route.params.id, 1, 10))).data;
+        this.categories = this.$route.params.id == null
+            ? (await categoryService.getPrimal(1, 10)).data
+            : (await categoryService.getSubcategories(this.$route.params.id, 1, 10)).data.body;
       } finally {
         this.isLoading = false;
       }
