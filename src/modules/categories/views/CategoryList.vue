@@ -7,7 +7,7 @@
     </v-row>
 
     <v-row v-else-if="categories.length">
-      <v-col cols="3" v-for="category in categories" :key="category.id">
+      <v-col cols="4" v-for="category in categories" :key="category.id">
         <v-card @click="moveToSubPage(category)">
           <v-img height="300" :src="fullPath(category.imageThumbnailPath)"/>
           <v-card-title>

@@ -1,34 +1,37 @@
 <template>
   <div>
     <v-row v-if="isLoading" justify="center" no-gutters class="my-12">
-      <v-progress-circular indeterminate color="primary" size="64" />
+      <v-progress-circular indeterminate color="primary" size="64"/>
     </v-row>
 
     <template v-else-if="product">
-      <v-row>
-        <v-col cols="4">
-          <v-img height="auto" :src="product.image" width="50%" />
+      <v-row class="mt-5">
+        <v-col cols="6">
+          <v-card elevation="5" outlined>
+            <v-carousel hide-delimiter-background>
+              <v-carousel-item
+                  v-for="(image, i) in product.imagePaths"
+                  :key="i"
+                  :src="fullPath(image)"
+                  reverse-transition="fade-transition"
+                  transition="fade-transition">
+              </v-carousel-item>
+            </v-carousel>
+          </v-card>
         </v-col>
 
-        <v-col cols="8">
-          <div class="green--text pb-0 text-h6">${{ product.price }}</div>
-
+        <v-col cols="6">
           <h1 class="mb-3">
-            {{ product.title }}
+            {{ product.name }}
           </h1>
-
-          <v-btn
-            v-if="checkIsInCart(product)"
-            class="white--text"
-            color="red"
-            @click="$store.commit('cart/REMOVE_ITEM', product.id)"
-          >
-            Remove from cart
-          </v-btn>
-
-          <v-btn v-else color="primary" @click="addToCart(product)">
-            Add to Cart
-          </v-btn>
+          <div class="green--text pb-0 text-h4 mb-3">{{ product.price }} ₽</div>
+          <div v-if="product.state === 'UNAVAILABLE'" class="red--text pb-0 text-h5 mb-3">Нет в наличии</div>
+          <div class="text-h6">В наличии {{ product.amount }} штук</div>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="6">
+          <v-textarea readonly :value="product.description" auto-grow rows="1" label="Описание"/>
         </v-col>
       </v-row>
     </template>
@@ -36,42 +39,29 @@
 </template>
 
 <script>
-import axios from "axios";
+import productService from "@/modules/products/api/service/products-service";
+import fileService from "@/api/service/file-service";
 
 export default {
-  name: "Product",
+  name: "product",
 
   data: () => ({
     product: null,
     isLoading: false
   }),
-
-  computed: {
-    cartItems() {
-      return this.$store.state.cart.items;
-    }
-  },
-
   async created() {
     this.isLoading = true;
 
     try {
-      const { data } = await axios.get(
-        `https://fakestoreapi.com/products/${this.$route.params.id}`
-      );
-      this.product = data;
+      this.product = (await productService.getProduct(this.$route.params.id)).data.body;
+      console.log(this.product)
     } finally {
       this.isLoading = false;
     }
   },
-
   methods: {
-    checkIsInCart(product) {
-      return this.cartItems.some(cartItem => cartItem.id === product.id);
-    },
-
-    addToCart(product) {
-      this.$store.commit("cart/ADD_ITEM", product);
+    fullPath(name) {
+      return fileService.buildFullAttachmentPath(name);
     }
   }
 };

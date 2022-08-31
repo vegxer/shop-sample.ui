@@ -7,14 +7,22 @@
     </v-row>
 
     <v-row v-else-if="products.length">
-      <v-col cols="3" v-for="product in products" :key="product.id">
-        <v-card v-bind:to="`/products/${product.id}`">
-          <v-img height="300" :src="fullPath(product.imageThumbnailPaths[0])"/>
-          <v-card-title class="green--text pb-0">
-            ${{ product.price }}
-          </v-card-title>
-          <v-card-title>
+      <v-col cols="4" v-for="product in products" :key="product.id">
+        <v-card>
+          <v-carousel hide-delimiters height="300">
+            <v-carousel-item v-bind:to="`/products/${product.id}`"
+                v-for="(image, i) in product.imageThumbnailPaths"
+                :key="i"
+                :src="fullPath(image)"
+                reverse-transition="fade-transition"
+                transition="fade-transition">
+            </v-carousel-item>
+          </v-carousel>
+          <v-card-title class="pb-0">
             {{ product.name }}
+          </v-card-title>
+          <v-card-title class="green--text pt-0">
+            {{ product.price }} ₽
           </v-card-title>
         </v-card>
       </v-col>

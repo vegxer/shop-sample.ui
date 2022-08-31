@@ -11,7 +11,7 @@ export default {
             component: ProductList
         },
         {
-            path: "products:id",
+            path: "products/:id",
             component: Product
         }
     ]
