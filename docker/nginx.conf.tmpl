@@ -38,12 +38,17 @@ http {
 	index index.html;
         server {
                 charset utf-8;
-                server_name ui;
+                server_name localhost;
 
                 access_log /var/log/nginx/access_log;
                 error_log /var/log/nginx/error_log;
 
                 root /usr/share/nginx/html/;
+
+                location /api/catalog/ {
+                         proxy_hide_header WWW-Authenticate;
+                         proxy_pass ${VUE_APP_CATALOG_URL};
+                }
 
                 location / {
                          try_files ${DOLLAR}uri ${DOLLAR}uri/ /index.html;

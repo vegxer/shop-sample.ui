@@ -7,6 +7,7 @@ COPY . .
 RUN npm run build --prod
 
 FROM nginx:stable-alpine as production-stage
+ENV DOLLAR=$
 COPY ./docker/nginx.conf.tmpl /etc/nginx/
 COPY --from=build-stage /app/target/dist /usr/share/nginx/html
 VOLUME /usr/share/nginx/html/

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const CATALOG_AXIOS = axios.create({
-    baseURL: process.env.VUE_APP_CATALOG_URL,
+    baseURL: '/api/catalog',
     timeout: 3000
 });
 

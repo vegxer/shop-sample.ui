@@ -12,5 +12,4 @@ do
 
 done
 
-echo "Starting Nginx"
-exec nginx -g 'daemon off;'
+envsubst < /etc/nginx/nginx.conf.tmpl > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'
