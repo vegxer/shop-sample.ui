@@ -5,6 +5,6 @@ export default {
         return CATALOG_AXIOS.get(`/attachment/${name}`);
     },
     buildFullAttachmentPath(name) {
-        return `${process.env.VUE_APP_CATALOG_URL}attachment/${name}`;
+        return `${CATALOG_AXIOS.defaults.baseURL}/attachment/${name}`;
     }
 };
