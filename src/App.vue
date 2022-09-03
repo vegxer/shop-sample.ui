@@ -2,7 +2,6 @@
   <v-app>
     <v-app-bar app dense flat outlined>
       <v-tabs>
-        <v-tab to="/">Home</v-tab>
         <v-tab to="/categories">Каталог</v-tab>
         <v-tab to="/cart">Корзина</v-tab>
       </v-tabs>

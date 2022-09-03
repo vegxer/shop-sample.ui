@@ -1,21 +1,36 @@
 <template>
   <div>
-    <h1 class="mb-3">Категории</h1>
+    <div v-if="isLoading">
+      <v-row justify="center" no-gutters class="my-12">
+        <v-progress-circular indeterminate color="primary" size="64"/>
+      </v-row>
+    </div>
 
-    <v-row v-if="isLoading" justify="center" no-gutters class="my-12">
-      <v-progress-circular indeterminate color="primary" size="64"/>
-    </v-row>
-
-    <v-row v-else-if="categories.length">
-      <v-col cols="4" v-for="category in categories" :key="category.id">
-        <v-card @click="moveToSubPage(category)">
-          <v-img height="300" :src="fullPath(category.imageThumbnailPath)"/>
-          <v-card-title>
-            {{ category.name }}
-          </v-card-title>
-        </v-card>
-      </v-col>
-    </v-row>
+    <div v-else-if="subcategories.length">
+      <navigation-menu :current-name="category" :categories-path="categoriesPath"/>
+      <v-row>
+        <v-col cols="4" v-for="category in subcategories" :key="category.id">
+          <v-card @click="moveToSubPage(category)">
+            <v-img height="300" :src="category.imageThumbnailPath == null ? '@/assets/no_photo.png' : fullPath(category.imageThumbnailPath)">
+              <template v-slot:placeholder>
+                <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center">
+                  <v-progress-circular
+                      indeterminate
+                      color="grey lighten-5"
+                  ></v-progress-circular>
+                </v-row>
+              </template>
+            </v-img>
+            <v-card-title>
+              {{ category.name }}
+            </v-card-title>
+          </v-card>
+        </v-col>
+      </v-row>
+    </div>
   </div>
 </template>
 
@@ -26,18 +41,24 @@ import fileService from "@/api/service/file-service";
 export default {
   name: "Home",
   data: () => ({
-    categories: [],
+    category: null,
+    subcategories: [],
+    categoriesPath: null,
     isLoading: false
   }),
   watch: {
-    $route (to, from) {
+    $route(to, from) {
       if (to.path.includes("categories") && from.path.includes("categories")) {
+        this.category = null;
+        this.subcategories = [];
+        this.categoriesPath = null;
         this.loadCategories();
       }
     }
   },
   created() {
     this.loadCategories();
+    document.title = this.$route.meta.title;
   },
   methods: {
     fullPath(name) {
@@ -47,16 +68,24 @@ export default {
       if (currCategory.hasChildren) {
         this.$router.push(`/categories/${currCategory.id}`);
       } else {
-        this.$router.push(`/categories/${currCategory.id}/products`);
+        this.$router.push(`/categories/${currCategory.id}/items`);
       }
     },
     async loadCategories() {
       this.isLoading = true;
 
       try {
-        this.categories = this.$route.params.id == null
-            ? (await categoryService.getPrimal(1, 10)).data
-            : (await categoryService.getSubcategories(this.$route.params.id, 1, 10)).data.body;
+        if (this.$route.params.id == null) {
+          this.subcategories = (await categoryService.getPrimal(1, 10)).data;
+        } else {
+          const response = (await categoryService.getSubcategories(this.$route.params.id, 1, 10)).data;
+          if (response.body.name != null) {
+            this.category =  response.body.name;
+            document.title = this.category;
+          }
+          this.categoriesPath = response.categoriesPath;
+          this.subcategories = response.body.items;
+        }
       } finally {
         this.isLoading = false;
       }

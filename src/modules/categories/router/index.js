@@ -7,11 +7,17 @@ export default {
     children: [
         {
             path: ":id",
-            component: CategoryList
+            component: CategoryList,
+            meta: {
+                title: "Категории"
+            }
         },
         {
             path: "",
-            component: CategoryList
+            component: CategoryList,
+            meta: {
+                title: "Категории"
+            }
         }
     ]
 };

@@ -8,6 +8,7 @@ import productsModule from "./modules/products";
 
 import { registerModules } from "./register-modules";
 import vuetify from "./plugins/vuetify";
+import NavigationMenu from "@/components/NavigationMenu";
 
 registerModules({
   categories: categoriesModule,
@@ -15,6 +16,7 @@ registerModules({
 });
 
 Vue.config.productionTip = false;
+Vue.component('navigation-menu', NavigationMenu);
 
 new Vue({
   router,

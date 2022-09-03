@@ -7,12 +7,18 @@ export default {
     component: Module,
     children: [
         {
-            path: "categories/:id/products",
-            component: ProductList
+            path: "categories/:id/items",
+            component: ProductList,
+            meta: {
+                title: "Товары"
+            }
         },
         {
             path: "products/:id",
-            component: Product
+            component: Product,
+            meta: {
+                title: "Товар"
+            }
         }
     ]
 };
