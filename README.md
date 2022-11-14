@@ -1,4 +1,4 @@
-# vue-modular-architecture
+# UI for catalog
 
 ## Project setup
 ```
@@ -20,5 +20,14 @@ npm run build
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Docker build
+```
+docker build -t maximkrupin/shop-sample-ui:${UI_VERSION} -f ./docker/Dockerfile .
+```
+
+### Docker run
+1) Set VUE_APP_CATALOG_URL in /docker/.env - address of catalog service
+2) From directory 'docker' execute:
+```
+docker-compose up -d
+```
