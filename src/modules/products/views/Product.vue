@@ -1,9 +1,9 @@
 <template>
   <div>
     <div v-if="isLoading">
-    <v-row justify="center" no-gutters class="my-12">
-      <v-progress-circular indeterminate color="primary" size="64"/>
-    </v-row>
+      <v-row justify="center" no-gutters class="my-12">
+        <v-progress-circular indeterminate color="primary" size="64"/>
+      </v-row>
     </div>
 
     <div v-else-if="product">
@@ -43,7 +43,9 @@
             {{ product.name }}
           </h1>
           <div class="green--text pb-0 text-h4 mb-3">{{ product.price }} ₽</div>
-          <div v-if="product.state === 'UNAVAILABLE' || product.amount === 0" class="red--text pb-0 text-h6 mb-3">Нет в наличии</div>
+          <div v-if="product.state === 'UNAVAILABLE' || product.amount === 0" class="red--text pb-0 text-h6 mb-3">Нет в
+            наличии
+          </div>
           <div v-else class="text-h6">В наличии {{ product.amount }} штук</div>
         </v-col>
       </v-row>

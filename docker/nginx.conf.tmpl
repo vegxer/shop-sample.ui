@@ -50,6 +50,11 @@ http {
                          proxy_pass ${VUE_APP_CATALOG_URL};
                 }
 
+                location /api/auth/ {
+                         proxy_hide_header WWW-Authenticate;
+                         proxy_pass ${VUE_APP_AUTH_URL};
+                }
+
                 location / {
                          try_files ${DOLLAR}uri ${DOLLAR}uri/ /index.html;
                 }

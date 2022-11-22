@@ -53,6 +53,7 @@ export default {
         this.subcategories = [];
         this.categoriesPath = null;
         this.loadCategories();
+        document.title = this.$route.meta.title;
       }
     }
   },

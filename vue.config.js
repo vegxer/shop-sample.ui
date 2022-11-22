@@ -10,6 +10,12 @@ module.exports = {
                 ws: true,
                 changeOrigin: true,
                 pathRewrite: {'^/api/catalog': ''}
+            },
+            '/api/auth': {
+                target: 'http://localhost:8081',
+                ws: true,
+                changeOrigin: true,
+                pathRewrite: {'^/api/auth': ''}
             }
         }
     },
