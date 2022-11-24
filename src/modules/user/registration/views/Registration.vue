@@ -3,12 +3,12 @@
     <v-layout flex align-center justify-center>
       <v-flex xs12 sm4 elevation-6>
         <v-toolbar class="blue darken-3">
-          <v-toolbar-title style="margin-left: 33%" class="white--text"><h4>Регистрация</h4></v-toolbar-title>
+          <v-toolbar-title class="white--text container"><h4 class="center">Регистрация</h4></v-toolbar-title>
         </v-toolbar>
         <v-card>
           <v-card-text class="pt-4">
             <div>
-              <v-form v-model="valid" ref="form">
+              <v-form @submit.prevent v-model="valid" ref="form">
                 <v-text-field
                     prepend-icon="mdi-account"
                     label="Логин"
@@ -41,8 +41,9 @@
                     :rules="repeatPasswordRules"
                     required
                 ></v-text-field>
-                <v-btn @click="submit" style="margin-left: 18%" width="65%" class="mt-5 blue darken-2 white--text">
-                  Зарегистрироваться
+                <v-btn @click="submit" block width="65%" type="submit"
+                       class="mt-5 blue darken-2 white--text container">
+                  Регистрация
                 </v-btn>
                 <div v-if="!valid" class="mt-3" style="color: red; text-align: center">
                   {{ errorMessage }}
@@ -53,14 +54,19 @@
         </v-card>
       </v-flex>
     </v-layout>
+    <confirm-dialog v-if="showDialog"></confirm-dialog>
   </v-container>
 </template>
 
 <script>
 import {mapActions} from "vuex";
+import ConfirmDialog from "@/modules/user/registration/components/ConfirmDialog";
 
 export default {
   name: "login",
+  components: {
+    'confirm-dialog': ConfirmDialog
+  },
   data() {
     return {
       valid: false,
@@ -84,7 +90,8 @@ export default {
         (v) => !!v || 'Необходим логин',
         (v) => v?.length > 2 || 'Длина логина должна быть не меньше трёх символов'
       ],
-      errorMessage: null
+      errorMessage: null,
+      showDialog: false
     }
   },
   created() {
@@ -100,19 +107,20 @@ export default {
         login: this.username,
         email: this.email,
         password: this.password
-      }).then(() => this.$router.push("/login"))
-          .catch(error => {
-            this.valid = false;
-            if (error.isAxiosError) {
-              if (error.response.status === 409) {
-                this.errorMessage = error.response.data.message;
-              } else if (error.response.status === 429) {
-                this.errorMessage = "Слишком много попыток входа, попробуйте позже";
-              } else {
-                this.errorMessage = "Упс! Что-то пошло не так..."
-              }
-            }
-          });
+      }).then(() => {
+        this.showDialog = true;
+      }).catch(error => {
+        this.valid = false;
+        if (error.isAxiosError) {
+          if (error.response.status === 409) {
+            this.errorMessage = error.response.data.message;
+          } else if (error.response.status === 429) {
+            this.errorMessage = "Слишком много попыток входа, попробуйте позже";
+          } else {
+            this.errorMessage = "Упс! Что-то пошло не так..."
+          }
+        }
+      });
     },
     clear() {
       this.$refs.form.reset()
@@ -122,5 +130,16 @@ export default {
 </script>
 
 <style scoped>
+.container {
+  position: relative;
+}
 
+.center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
 </style>

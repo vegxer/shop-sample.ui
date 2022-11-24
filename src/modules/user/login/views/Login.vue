@@ -3,12 +3,12 @@
     <v-layout flex align-center justify-center>
       <v-flex xs12 sm4 elevation-6>
         <v-toolbar class="blue darken-3">
-          <v-toolbar-title style="margin-left: 33%" class="white--text"><h4>Авторизация</h4></v-toolbar-title>
+          <v-toolbar-title class="white--text container"><h4 class="center">Авторизация</h4></v-toolbar-title>
         </v-toolbar>
         <v-card>
           <v-card-text class="pt-4">
             <div>
-              <v-form v-model="valid" ref="form">
+              <v-form @submit.prevent v-model="valid" ref="form">
                 <v-text-field
                     prepend-icon="mdi-account"
                     label="Логин"
@@ -25,10 +25,10 @@
                     :rules="passwordRules"
                     required
                 ></v-text-field>
-                <v-btn @click="submit" style="margin-left: 25%" width="50%" class="mt-5 blue darken-2 white--text">
+                <v-btn @click="submit" type="submit" block class="mt-5 blue darken-2 white--text">
                   Войти
                 </v-btn>
-                <div v-if="!valid" class="mt-3" style="color: red; text-align: center">
+                <div v-if="errorMessage != null" class="mt-3" style="color: red; text-align: center">
                   {{ errorMessage }}
                 </div>
               </v-form>
@@ -68,12 +68,12 @@ export default {
       if (!this.$refs.form.validate()) {
         return;
       }
+      this.errorMessage = null;
       this.login({
         login: this.username,
         password: this.password
       }).then(() => this.$router.push("/profile"))
           .catch(error => {
-            this.valid = false;
             if (error.isAxiosError) {
               if (error.response.status === 400) {
                 this.errorMessage = "Неверный логин или пароль";
@@ -93,7 +93,17 @@ export default {
   }
 }
 </script>
-
 <style scoped>
+.container {
+  position: relative;
+}
 
+.center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
 </style>

@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   ui:
-    image: maximkrupin/shop-sample-ui:${UI_VERSION}
+    image: vscode.maxeem.ru/shop-sample-ui:${UI_VERSION}
     networks:
       - shop-ui-lan
     ports:

@@ -18,7 +18,9 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
   if (store.getters["user/isAuthorized"] == null) {
     await store.dispatch("user/refreshToken")
-        .catch(() => {});
+        .catch(() => {
+          store.commit('user/unauthorize');
+        });
   }
   return next();
 });

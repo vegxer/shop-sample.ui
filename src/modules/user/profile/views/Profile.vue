@@ -24,7 +24,7 @@
                 <v-text-field
                     prepend-icon="mdi-key"
                     label="Роль"
-                    v-model="getRole"
+                    v-model="role"
                     readonly
                     outlined
                     required
@@ -58,10 +58,14 @@ export default {
     document.title = this.$route.meta.title;
   },
   computed: {
-    ...mapGetters("user", ["getRole", "getLogin", "getEmail"])
+    ...mapGetters("user", ["getLogin", "getEmail"]),
+    role() {
+      return this.getRole() === 'ADMIN' ? 'Администратор' : 'Пользователь';
+    }
   },
   methods: {
     ...mapActions("user", ["logout"]),
+    ...mapGetters("user", ["getRole"]),
     tryLogout() {
       this.errorMessage = null;
       this.logout()

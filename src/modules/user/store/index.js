@@ -6,6 +6,7 @@ export default {
     namespaced: true,
     state: {
         isAuthorized: null,
+        id: null,
         role: null,
         login: null,
         email: null
@@ -59,6 +60,7 @@ export default {
                     commit("setRole", response.data.role);
                     commit("setLogin", response.data.login);
                     commit("setEmail", response.data.email);
+                    commit("setId", response.data.id);
                 })
                 .catch(err => {
                     if (err.response?.status === 401) {
@@ -82,6 +84,9 @@ export default {
         setEmail(state, email) {
             state.email = email;
         },
+        setId(state, id) {
+            state.id = id;
+        },
         unauthorize(state) {
             state.role = null;
             state.isAuthorized = false;
@@ -102,6 +107,9 @@ export default {
         },
         getRole(state) {
             return state.role;
+        },
+        getId(state) {
+            return state.id;
         }
     }
 };
