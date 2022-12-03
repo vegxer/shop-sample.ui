@@ -1,12 +1,9 @@
 <template>
-  <div class="mb-10 d-flex">
-    <v-btn class="pt-0 pb-0 pl-0 pr-2" @click="$router.push('/categories')" large plain>Категории</v-btn>
-    <v-icon v-if="currentName != null">mdi-chevron-right</v-icon>
-    <div v-for="category in categoriesPath" :key="category.id">
-      <v-btn class="pt-0 pb-0 pl-1 pr-1" :to="categoryPath(category.id)" large plain>{{ category.name }}</v-btn>
-      <v-icon>mdi-chevron-right</v-icon>
-    </div>
-    <v-btn class="pl-1 pr-0 pt-0 pb-0" large plain>{{ currentName }}</v-btn>
+  <div class="mb-3">
+    <v-btn class="pl-0 pr-0" v-for="item in items" :key="item.id" @click="$router.push(categoryPath(item.id))" large plain>
+      <v-icon dense v-if="item.id !== '' && item.name != null">mdi-chevron-right</v-icon>
+      {{ item.name }}
+    </v-btn>
   </div>
 </template>
 
@@ -23,6 +20,11 @@ export default {
       required: false,
       default: () => []
     }
+  },
+  data() {
+    return {
+      items: Array.of({id: '', name: "Категории"}, ...(this.categoriesPath ?? []), {name: this.currentName})
+    };
   },
   methods: {
     categoryPath(categoryId) {

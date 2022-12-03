@@ -8,10 +8,9 @@ const CATALOG_AXIOS = axios.create({
 });
 
 CATALOG_AXIOS.interceptors.response.use(response => response, error => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 403 && store.getters["user/isAdmin"]) {
         return store.dispatch("user/refreshToken")
             .then(() => {
-                error.config.baseURL = undefined;
                 return axios.request(error.config);
             })
             .catch(err => {

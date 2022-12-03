@@ -6,11 +6,15 @@
       </v-row>
     </div>
 
-    <div v-else-if="products.length">
+    <div v-else-if="products != null" class="mb-16">
       <navigation-menu :current-name="category" :categories-path="categoriesPath"/>
+      <v-btn v-if="isAdmin" class="mb-4" color="success" small @click="createCategory()">
+        <v-icon class="mr-1" small>mdi-plus</v-icon>
+        Подкатегория
+      </v-btn>
       <v-row>
-        <v-col cols="4" v-for="product in products" :key="product.id">
-          <v-card>
+        <v-col style="max-width: 440px;" v-for="product in products" :key="product.id" class="d-flex mb-5">
+          <v-card width="350">
             <router-link v-if="product.imageThumbnailPaths == null || product.imageThumbnailPaths.length === 0"
                          :to="`/products/${product.id}`">
               <v-img height="300"
@@ -44,46 +48,171 @@
               {{ product.price }} ₽
             </v-card-title>
           </v-card>
+          <v-menu v-if="isAdmin">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn icon
+                     v-bind="attrs"
+                     v-on="on">
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="deleteProduct(product.id)">
+                <v-list-item-title>Удалить</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </v-col>
       </v-row>
     </div>
+    <v-pagination
+        class="pagination"
+        :length="pagination.totalPages"
+        :total-visible="10"
+        v-model="pagination.currPage"
+        @input="loadProducts"
+    >
+    </v-pagination>
+    <v-snackbar color="red" :value="error != null">
+      {{ error }}
+      <template #action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="error = null">
+          Закрыть
+        </v-btn>
+      </template>
+    </v-snackbar>
+    <category-save v-if="editCategory.isEditing" @cancel="cancelCategoryEdit" @save="confirmCategoryEdit"
+                   :image-path="editCategory.imagePath" :name="editCategory.name">
+    </category-save>
   </div>
 </template>
 
 <script>
 import productService from "@/modules/products/api/service/products-service";
 import fileService from "@/api/service/file-service";
+import CategoryAdd from "@/modules/categories/components/CategorySave";
+import {mapGetters} from "vuex";
+import categoryService from "@/modules/categories/api/service/category-service";
 
 export default {
-  name: "Home",
+  name: "product-list",
+  components: {
+    'category-save': CategoryAdd
+  },
   data: () => ({
     category: null,
     categoriesPath: null,
     products: [],
-    isLoading: false
-  }),
-  async created() {
-    this.isLoading = true;
-
-    try {
-      const response = (await productService.getCategoryProducts(this.$route.params.id, 1, 10, "id", "ASC")).data;
-      if (response.body.name != null) {
-        this.category = response.body.name;
-        document.title = this.category;
-      }
-      this.categoriesPath = response.categoriesPath;
-      this.products = response.body.items;
-    } finally {
-      this.isLoading = false;
+    isLoading: false,
+    error: null,
+    pagination: {
+      currPage: 1,
+      pageSize: 12,
+      totalPages: 0
+    },
+    editCategory: {
+      isEditing: false
     }
+  }),
+  computed: {
+    ...mapGetters("user", ["isAdmin"])
+  },
+  created() {
+    this.loadProducts();
   },
   mounted() {
     document.title = this.$route.meta.title;
   },
   methods: {
+    createCategory() {
+      this.editCategory.isEditing = true;
+    },
+    async confirmCategoryEdit(data) {
+      this.editCategory.isEditing = false;
+      this.isLoading = true;
+      let categoryId;
+      try {
+        categoryId = (await categoryService.createSubcategory({
+              name: data.name,
+              parentId: this.$route.params.id
+            })).data;
+      } catch (error) {
+        this.setError("Не удалось сохранить категорию");
+        this.isLoading = false;
+        return;
+      }
+      if (data.updateImage) {
+        try {
+          await categoryService.setCategoryImage(categoryId, data.fileBlob);
+        } catch (error) {
+          this.setError("Не удалось сохранить картинку");
+          this.isLoading = false;
+          return;
+        }
+      } else if (data.deleteImage) {
+        try {
+          await categoryService.deleteImage(categoryId);
+        } catch (error) {
+          this.setError("Не удалось удалить картинку");
+          this.isLoading = false;
+          return;
+        }
+      }
+      this.isLoading = false;
+      this.$router.push(`/categories/${this.$route.params.id}`);
+    },
+    cancelCategoryEdit() {
+      this.editCategory.isEditing = false;
+    },
+    async loadProducts() {
+      this.isLoading = true;
+
+      try {
+        const response = (await productService.getCategoryProducts(this.$route.params.id, 1, 10, "id", "ASC")).data;
+        if (response.body.name != null) {
+          this.category = response.body.name;
+          document.title = this.category;
+        }
+        this.categoriesPath = response.categoriesPath;
+        this.products = response.body.items.items;
+        this.pagination.totalPages = response.body.items.totalPages;
+      } catch (error) {
+        this.setError("Не удалось загрузить товары");
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async deleteProduct(id) {
+      this.isLoading = true;
+      try {
+        await productService.deleteProduct(id);
+      } catch (error) {
+        this.setError("Не удалось удалить товар");
+      } finally {
+        this.isLoading = false
+      }
+    },
+    setError(message) {
+      if (this.error == null) {
+        this.error = message;
+        setTimeout(() => {
+          this.error = null;
+        }, 4000);
+      }
+    },
     fullPath(name) {
       return fileService.buildFullAttachmentPath(name);
     }
   }
 };
 </script>
+<style scoped>
+.pagination {
+  position: absolute;
+  bottom: -15px;
+  margin: 0;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+</style>
