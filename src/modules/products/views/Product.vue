@@ -7,11 +7,12 @@
     </div>
 
     <div v-else-if="product">
-      <navigation-menu :current-name="product.name" :categories-path="categoriesPath"/>
+      <navigation-menu v-if="!creating" :current-name="product.name" :categories-path="categoriesPath"/>
+      <v-btn v-if="isAdmin && !editing" class="mt-2 mr-3" color="error" @click="deleteProduct">Удалить</v-btn>
       <v-btn v-if="isAdmin && !editing" class="mt-2" color="primary" @click="startEdit">Редактировать</v-btn>
       <div v-if="editing" class="mt-5">
         <v-btn class="mr-2" color="error" @click="cancelEditing">Отмена</v-btn>
-        <v-btn color="success" @click="saveProduct" :disabled="!editDataValid">Сохранить</v-btn>
+        <v-btn color="success" @click="creating ? createProduct() : updateProduct()" :disabled="!editDataValid">Сохранить</v-btn>
       </div>
       <v-row class="mt-2">
         <v-col cols="6">
@@ -30,7 +31,7 @@
                   :key="i"
                   reverse-transition="fade-transition"
                   transition="fade-transition">
-                <v-img height="600" :src="image.path?.startsWith('blob') ? image.path : fullPath(image)"
+                <v-img :src="image.path?.startsWith('blob') ? image.path : fullPath(image)"
                        :gradient="image.deleted ? 'to top right, rgba(100,115,201,.33), rgba(25,32,72,.7)' : ''">
                   <template v-slot:placeholder>
                     <v-row
@@ -39,7 +40,7 @@
                         justify="center">
                       <v-progress-circular
                           indeterminate
-                          color="grey lighten-5"
+                          color="black"
                       ></v-progress-circular>
                     </v-row>
                   </template>
@@ -105,7 +106,13 @@ import {mapGetters} from "vuex";
 
 export default {
   name: "product",
-
+  props: {
+    creating: {
+      type: Boolean,
+      required: false,
+      default: false
+    }
+  },
   data: () => ({
     product: null,
     error: null,
@@ -137,9 +144,34 @@ export default {
     ...mapGetters("user", ["isAdmin"])
   },
   created() {
-    this.fetchProduct();
+    if (!this.creating) {
+      this.fetchProduct();
+    } else {
+      this.editData = {
+        imagePaths: [],
+        categoryId: this.$route.params.id,
+        state: 'AVAILABLE'
+      }
+      this.editing = true;
+      this.product = {
+        state: 'AVAILABLE'
+      }
+    }
+    document.title = this.$route.meta.title;
   },
   methods: {
+    async deleteProduct() {
+      try {
+        await productService.deleteProduct(this.$route.params.id);
+        if (this.categoriesPath[this.categoriesPath.length - 1]?.id != null) {
+          this.$router.push(`/categories/${this.categoriesPath[this.categoriesPath.length - 1]?.id}/items`);
+        } else {
+          this.$router.go(-1);
+        }
+      } catch (error) {
+        this.setError('Ошибка удаления товара');
+      }
+    },
     changeDescription(text) {
       (this.editing ? this.editData : this.product).description = text;
     },
@@ -172,8 +204,12 @@ export default {
       this.editing = true;
     },
     cancelEditing() {
-      this.editData = null;
-      this.editing = false;
+      if (this.creating) {
+        this.$router.push(`/categories/${this.$route.params.id}/items`);
+      } else {
+        this.editData = null;
+        this.editing = false;
+      }
     },
     deleteImage(name) {
       this.editData.imagePaths.find(imagePath => imagePath === name).deleted = true;
@@ -190,7 +226,7 @@ export default {
         this.isLoading = false;
       }
     },
-    async saveProduct() {
+    async updateProduct() {
       this.isLoading = true;
       try {
         try {
@@ -209,6 +245,7 @@ export default {
         } catch (error) {
           this.setError("Ошибка при загрузке картинки");
         }
+
         this.setProductFields((await productService.updateProduct(this.editData)).data);
       } catch (error) {
         this.setError("Ошибка при обновлении товара");
@@ -216,6 +253,25 @@ export default {
         this.editing = false;
         this.editData = null;
         this.isLoading = false;
+      }
+    },
+    async createProduct() {
+      this.isLoading = true;
+      try {
+        const savedProductId = (await productService.createProduct(this.editData)).data;
+        try {
+          for (const image of this.editData?.imagePaths?.filter(image => !image.deleted && image.blob != null)) {
+            await productService.uploadFile(image.blob, savedProductId);
+          }
+        } catch (error) {
+          this.setError("Ошибка при загрузке картинки");
+        }
+        location.assign(`/products/${savedProductId}`);
+      } catch (error) {
+        this.editing = false;
+        this.editData = null;
+        this.isLoading = false;
+        this.setError("Ошибка при создании товара");
       }
     },
     setProductFields(response) {

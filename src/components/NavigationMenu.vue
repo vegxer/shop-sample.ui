@@ -1,6 +1,6 @@
 <template>
   <div class="mb-3">
-    <v-btn class="pl-0 pr-0" v-for="item in items" :key="item.id" @click="$router.push(categoryPath(item.id))" large plain>
+    <v-btn class="pl-0 pr-0" v-for="item in items" :key="item.id" @click="item.id == null ? null : $router.push(categoryPath(item.id))" large plain>
       <v-icon dense v-if="item.id !== '' && item.name != null">mdi-chevron-right</v-icon>
       {{ item.name }}
     </v-btn>

@@ -24,7 +24,7 @@
                     justify="center">
                   <v-progress-circular
                       indeterminate
-                      color="grey lighten-5"
+                      color="black"
                   ></v-progress-circular>
                 </v-row>
               </template>
@@ -115,6 +115,7 @@ export default {
         this.editCategory.id = null;
         this.editCategory.imagePath = null;
         this.error = null;
+        this.pagination.currPage = 1;
         this.loadCategories();
         document.title = this.$route.meta.title;
       }
@@ -184,8 +185,11 @@ export default {
     },
     deleteCategory(categoryId) {
       categoryService.deleteCategory(categoryId)
-          .then(() => {
-            this.loadCategories();
+          .then(async () => {
+            await this.loadCategories();
+            if (this.subcategories == null || this.subcategories.length === 0) {
+              this.$router.push(`/categories/${this.$route.params.id}/items`);
+            }
           })
           .catch(() => {
             this.setError("Не удалось удалить категорию");

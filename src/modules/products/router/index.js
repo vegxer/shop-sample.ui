@@ -14,6 +14,16 @@ export default {
             }
         },
         {
+            path: "categories/:id/create",
+            component: Product,
+            meta: {
+                title: "Создание товара"
+            },
+            props: {
+                creating: true
+            }
+        },
+        {
             path: "products/:id",
             component: Product,
             meta: {

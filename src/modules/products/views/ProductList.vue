@@ -8,10 +8,20 @@
 
     <div v-else-if="products != null" class="mb-16">
       <navigation-menu :current-name="category" :categories-path="categoriesPath"/>
-      <v-btn v-if="isAdmin" class="mb-4" color="success" small @click="createCategory()">
-        <v-icon class="mr-1" small>mdi-plus</v-icon>
-        Подкатегория
-      </v-btn>
+      <div v-if="isAdmin" class="mb-4">
+        <div class="mb-2">
+          <v-btn color="success" small @click="createCategory">
+            <v-icon class="mr-1" small>mdi-plus</v-icon>
+            Подкатегория
+          </v-btn>
+        </div>
+        <div>
+          <v-btn color="primary" small @click="createProduct">
+            <v-icon class="mr-1" small>mdi-plus</v-icon>
+            Товар
+          </v-btn>
+        </div>
+      </div>
       <v-row>
         <v-col style="max-width: 440px;" v-for="product in products" :key="product.id" class="d-flex mb-5">
           <v-card width="350">
@@ -34,7 +44,7 @@
                         justify="center">
                       <v-progress-circular
                           indeterminate
-                          color="grey lighten-5"
+                          color="black"
                       ></v-progress-circular>
                     </v-row>
                   </template>
@@ -124,6 +134,9 @@ export default {
     document.title = this.$route.meta.title;
   },
   methods: {
+    createProduct() {
+      this.$router.push(`/categories/${this.$route.params.id}/create`);
+    },
     createCategory() {
       this.editCategory.isEditing = true;
     },
@@ -133,9 +146,9 @@ export default {
       let categoryId;
       try {
         categoryId = (await categoryService.createSubcategory({
-              name: data.name,
-              parentId: this.$route.params.id
-            })).data;
+          name: data.name,
+          parentId: this.$route.params.id
+        })).data;
       } catch (error) {
         this.setError("Не удалось сохранить категорию");
         this.isLoading = false;
@@ -168,7 +181,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const response = (await productService.getCategoryProducts(this.$route.params.id, 1, 10, "id", "ASC")).data;
+        const response = (await productService.getCategoryProducts(this.$route.params.id, this.pagination.currPage, this.pagination.pageSize, "id", "ASC")).data;
         if (response.body.name != null) {
           this.category = response.body.name;
           document.title = this.category;
@@ -186,10 +199,11 @@ export default {
       this.isLoading = true;
       try {
         await productService.deleteProduct(id);
+        await this.loadProducts();
       } catch (error) {
         this.setError("Не удалось удалить товар");
       } finally {
-        this.isLoading = false
+        this.isLoading = false;
       }
     },
     setError(message) {

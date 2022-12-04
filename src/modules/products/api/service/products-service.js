@@ -24,6 +24,13 @@ export default {
             }
         });
     },
+    createProduct(data) {
+        return CATALOG_AXIOS.post('/product', JSON.stringify(data), {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    },
     uploadFile(fileBlob, productId) {
         const formData = new FormData();
         formData.set("productId", productId);
