@@ -14,9 +14,10 @@ export default {
     actions: {
         refreshToken({dispatch, commit}) {
             return authService.refreshToken()
-                .then(async () => {
+                .then(async response => {
                     commit("setAuthorized", true);
                     await dispatch("getProfile");
+                    return Promise.resolve(response);
                 })
                 .catch(err => {
                     if (err.response?.status === 401) {
@@ -57,19 +58,33 @@ export default {
         getProfile({commit, dispatch}) {
             return authService.getUserInfo()
                 .then(response => {
-                    commit("setRole", response.data.role);
-                    commit("setLogin", response.data.login);
-                    commit("setEmail", response.data.email);
-                    commit("setId", response.data.id);
+                    commit("setUserData", response.data);
                 })
                 .catch(err => {
                     if (err.response?.status === 401) {
-                        dispatch("refreshToken");
+                        dispatch("refreshToken").then(() => {
+                            dispatch("getProfile");
+                        });
                     } else {
                         throw err;
                     }
                 });
         },
+        updateProfile({commit, dispatch}, payload) {
+            return authService.updateUserInfo(payload)
+                .then(response => {
+                    commit("setUserData", response.data);
+                    return Promise.resolve(response);
+                }).catch(error => {
+                    if (error.response?.status === 401) {
+                        dispatch("refreshToken").then(() => {
+                            dispatch("updateProfile", payload);
+                        });
+                    } else {
+                        throw error;
+                    }
+                })
+        }
     },
     mutations: {
         setAuthorized(state, isAuthorized) {
@@ -86,6 +101,12 @@ export default {
         },
         setId(state, id) {
             state.id = id;
+        },
+        setUserData(state, userData) {
+            state.role = userData.role;
+            state.login = userData.login;
+            state.email = userData.email;
+            state.id = userData.id;
         },
         unauthorize(state) {
             state.role = null;

@@ -17,12 +17,15 @@
                     required
                 ></v-text-field>
                 <v-text-field
-                    prepend-icon="mdi-account"
+                    prepend-icon="mdi-email"
                     label="Email"
                     v-model="email"
                     :rules="emailRules"
                     required
                 ></v-text-field>
+                <v-select v-model="role" :items="roles" item-text="text" prepend-icon="mdi-key" label="Роль"
+                          item-value="value">
+                </v-select>
                 <v-text-field
                     prepend-icon="mdi-lock"
                     label="Пароль"
@@ -90,6 +93,11 @@ export default {
         (v) => !!v || 'Необходим логин',
         (v) => v?.length > 2 || 'Длина логина должна быть не меньше трёх символов'
       ],
+      role: 'USER',
+      roles: [
+        {value: 'USER', text: 'Пользователь'},
+        {value: 'ADMIN', text: 'Администратор'}
+      ],
       errorMessage: null,
       showDialog: false
     }
@@ -106,7 +114,8 @@ export default {
       this.register({
         login: this.username,
         email: this.email,
-        password: this.password
+        password: this.password,
+        role: this.role
       }).then(() => {
         this.showDialog = true;
       }).catch(error => {

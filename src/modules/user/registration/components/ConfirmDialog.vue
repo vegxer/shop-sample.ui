@@ -1,14 +1,14 @@
 <template>
   <div class="text-center">
-    <v-dialog :value="true" width="500">
+    <v-dialog :value="isOpen" width="500">
 
       <v-card>
         <v-card-title class="text-h5 grey lighten-2">
-          Вы успешно зарегистрировались
+          Вы успешно {{registration ? 'зарегистрировались' : 'сменили email'}}
         </v-card-title>
 
         <v-card-text class="mt-5">
-          На ваш email отправлено письмо с подтверждением. Подтвердите адрес электронной почты, после чего авторизуйтесь на сайте
+          На ваш email отправлено письмо с подтверждением. Подтвердите адрес электронной почты{{registration ? ', после чего авторизуйтесь на сайте' : ''}}
         </v-card-text>
 
         <v-divider></v-divider>
@@ -18,7 +18,7 @@
           <v-btn
               color="primary"
               text
-              @click="$router.push('/login')">
+              @click="registration ? $router.push('/login') : close()">
             OK
           </v-btn>
         </v-card-actions>
@@ -29,6 +29,23 @@
 
 <script>
 export default {
-  name: "confirm-dialog"
+  name: "confirm-dialog",
+  props: {
+    registration: {
+      required: false,
+      type: Boolean,
+      default: true
+    }
+  },
+  data() {
+    return {
+      isOpen: true
+    };
+  },
+  methods: {
+    close() {
+      this.isOpen = false;
+    }
+  }
 }
 </script>
